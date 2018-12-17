@@ -1,0 +1,6 @@
+l2cap_packet ($packet_len: u16) = {
+  public length: u16;
+  public channel_id: u16;
+  public payload: [u8; $packet_len - 4];
+}
+

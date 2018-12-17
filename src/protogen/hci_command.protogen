@@ -1,0 +1,564 @@
+hci_command ($type: u8 = 0x01) = {
+  @opcode: u16;
+  @ogf: u8 = @opcode >> 10;
+  @ocf: u16 = @opcode & 0x400 - 1;
+  @length: u8;
+  @data: [u8; @length];
+  public command: apply @data choose {
+    Reset = reset(@ogf, @ocf) |
+    SetEventFilter = set_event_filter(@ogf, @ocf) |
+    Flush = flush(@ogf, @ocf) |
+    WriteLocalName = write_local_name(@ogf, @ocf) |
+    ReadLocalName = read_local_name(@ogf, @ocf) |
+    ReadConnectionAcceptTimeout = read_connection_accept_timeout(@ogf, @ocf) |
+    WriteConnectionAcceptTimeout = write_connection_accept_timeout(@ogf, @ocf) |
+    ReadPageTimeout = read_page_timeout(@ogf, @ocf) |
+    WritePageTimeout = write_page_timeout(@ogf, @ocf) |
+    ReadScanEnable = read_scan_enable(@ogf, @ocf) |
+    WriteScanEnable = write_scan_enable(@ogf, @ocf) |
+    ReadPageScanActivity = read_page_scan_activity(@ogf, @ocf) |
+    WritePageScanActivity = write_page_scan_activity(@ogf, @ocf) |
+    ReadInquiryScanActivity = read_inquiry_scan_activity(@ogf, @ocf) |
+    WriteInquiryScanActivity = write_inquiry_scan_activity(@ogf, @ocf) |
+    LESetAdvertisingData = le_set_advertising_data(@ogf, @ocf) |
+    Unknown = unknown(@ogf, @ocf)
+  };
+}
+
+// used by most command complete messages
+response_status = {
+  public status_code: u8;
+}
+
+// unknown command
+unknown ($ogf: u8, $ocf: u16) = {}
+
+
+//////////////////////////////////////
+//  CONTROLLER & BASEBAND COMMANDS  //
+//    BLUETOOTH SPEC v5.0 pg 901    //
+//           (OGF=0x03)             //
+//////////////////////////////////////
+
+// TODO: set_event_mask (pg 901)
+
+// reset (pg 904)
+reset ($ogf: u8 = 0x03, $ocf : u16 = 0x0003) = {}
+reset_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0003) = {
+  public status: response_status();
+}
+
+// set_event_filter (pg 905)
+set_event_filter ($ogf: u8 = 0x03, $ocf : u16 = 0x0005) = {
+  @filter_type: u8;
+  public filter: choose {
+    ClearAllFilter = clear_all_filter(@filter_type) |
+    InquiryResult = inquiry_result(@filter_type) |
+    ConnectionSetup = connection_setup(@filter_type)
+  };
+}
+set_event_filter_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0005) = {
+  public status: response_status();
+}
+
+inquiry_result ($filter_type: u8 = 0x01) = {
+  public condition: filter_condition();
+}
+
+connection_setup ($filter_type: u8 = 0x02) = {
+  public condition: filter_condition();
+  public auto_accept: u8;
+}
+
+filter_condition = {
+  @condition_type: u8;
+  public value: choose {
+    AllDevices = all_devices(@condition_type) |
+    MatchClass = match_class(@condition_type) |
+    MatchAddress = match_address(@condition_type)
+  };
+}
+
+clear_all_filter($filter_type: u8 = 0x00) = {}
+
+all_devices ($condition_type: u8 = 0x00) = {}
+
+match_class ($condition_type: u8 = 0x01) = {
+  public class_of_device: [u8; 3];
+  public class_of_device_mask: [u8; 3];
+}
+
+match_address ($condition_type: u8 = 0x02) = {
+  public address: [u8; 6];
+}
+
+// flush (pg 911)
+flush ($ogf: u8 = 0x03, $ocf : u16 = 0x0008) = {
+  public connection_handle: u16;
+}
+
+flush_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0008) = {
+  public status: response_status();
+  public connection_handle: u16;
+}
+
+// TODO: read_pin_type_command (pg 913)
+// TODO: write_pin_type_command (pg 918)
+// TODO: create_new_unit_key (pg 915)
+// TODO: read_stored_link_key (pg 916)
+// TODO: write_stored_link_key (pg 918)
+// TODO: delete_stored_link_key (pg 920
+
+// write local name (pg. 922)
+write_local_name ($ogf: u8 = 0x03, $ocf : u16 = 0x0013) = {
+  @local_name_buffer: [u8; 248];
+  public local_name: apply @local_name_buffer cstring;
+}
+
+write_local_name_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0013) = {
+  public status: response_status();
+}
+
+// read local name (pg. 923)
+read_local_name ($ogf: u8 = 0x03, $ocf : u16 = 0x0014) = {}
+
+read_local_name_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0014) = {
+  public status: response_status();
+  @local_name_buffer: [u8; 248];
+  public local_name: apply @local_name_buffer cstring;
+}
+
+// read connection accept timeout (pg. 924)
+read_connection_accept_timeout ($ogf: u8 = 0x03, $ocf : u16 = 0x0015) = {
+}
+
+read_connection_accept_timeout_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0015) = {
+  public status: response_status();
+  public connection_accept_timeout: u16;
+}
+
+// write connection accept timeout (pg. 925)
+write_connection_accept_timeout ($ogf: u8 = 0x03, $ocf : u16 = 0x0016) = {
+  public connection_accept_timeout: u16;
+}
+
+write_connection_accept_timeout_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0016) = {
+  public status: response_status();
+}
+
+// read page timeout (pg. 926)
+read_page_timeout ($ogf: u8 = 0x03, $ocf : u16 = 0x0017) = {
+}
+
+read_page_timeout_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0017) = {
+  public status: response_status();
+  public page_timeout: u16;
+}
+
+// write page timeout (pg. 927)
+write_page_timeout ($ogf: u8 = 0x03, $ocf : u16 = 0x0018) = {
+  public page_timeout: u16;
+}
+
+write_page_timeout_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0018) = {
+  public status: response_status();
+}
+
+// read scan enable (pg. 928)
+read_scan_enable ($ogf: u8 = 0x03, $ocf : u16 = 0x0019) = {
+}
+
+read_scan_enable_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0019) = {
+  public status: response_status();
+  public scan_enable: u8;
+}
+
+// write scan enable (pg. 929)
+write_scan_enable ($ogf: u8 = 0x03, $ocf : u16 = 0x001A) = {
+  public scan_enable: u8;
+}
+
+write_scan_enable_response ($ogf: u8 = 0x03, $ocf : u16 = 0x001A) = {
+  public status: response_status();
+}
+
+// read page scan activity (pg. 930)
+read_page_scan_activity ($ogf: u8 = 0x03, $ocf : u16 = 0x001B) = {
+}
+
+read_page_scan_activity_response ($ogf: u8 = 0x03, $ocf : u16 = 0x001B) = {
+  public status: response_status();
+  public page_scan_interval: u16;
+  public page_scan_window: u16;
+}
+
+// write page scan activity (pg. 932)
+write_page_scan_activity ($ogf: u8 = 0x03, $ocf : u16 = 0x001C) = {
+  public page_scan_interval: u16;
+  public page_scan_window: u16;
+}
+
+write_page_scan_activity_response ($ogf: u8 = 0x03, $ocf : u16 = 0x001C) = {
+  public status: response_status();
+}
+
+// read inquiry scan activity (pg. 933)
+read_inquiry_scan_activity ($ogf: u8 = 0x03, $ocf : u16 = 0x001D) = {
+}
+
+read_inquiry_scan_activity_response ($ogf: u8 = 0x03, $ocf : u16 = 0x001D) = {
+  public status: response_status();
+  public inquiry_scan_interval: u16;
+  public inquiry_scan_window: u16;
+}
+
+// write inquiry scan activity (pg. 935)
+write_inquiry_scan_activity ($ogf: u8 = 0x03, $ocf : u16 = 0x001E) = {
+  public inquiry_scan_interval: u16;
+  public inquiry_scan_window: u16;
+}
+
+write_inquiry_scan_activity_response ($ogf: u8 = 0x03, $ocf : u16 = 0x001E) = {
+  public status: response_status();
+}
+
+// TODO: read authentication enable (pg. 936)
+// TODO: write authentication enable (pg. 937)
+// TODO: read class of device (pg. 938)
+// TODO: write class of device (pg. 939)
+// TODO: read voice setting (pg. 940)
+// TODO: write voice setting (pg. 941)
+// TODO: read automatic flush timeout (pg. 942)
+// TODO: write automatic flush timeout  (pg. 944)
+// TODO: read num broadcast retransmissions  (pg. 946)
+// TODO: write num broadcast retransmissions (pg. 947)
+// TODO: read hold mode activity (pg. 948)
+// TODO: write hold mode activity (pg. 949)
+// TODO: read transmit power level (pg. 950)
+// TODO: read synchronous flow control enable (pg. 952)
+// TODO: write synchronous flow control enable (pg. 953)
+// TODO: set controller to host flow control (pg. 954)
+// TODO: host buffer size  (pg. 956)
+// TODO: host number of completed packets  (pg. 958)
+// TODO: read link supervision timeout  (pg. 960)
+// TODO: write link supervision timeout (pg. 962)
+// TODO: read number of supported iac (pg. 964)
+// TODO: read current iac lap (pg. 965)
+// TODO: write current iac lap  (pg. 966)
+// TODO: set afh host channel classification (pg. 968)
+// TODO: read inquiry scan type (pg. 970)
+// TODO: write inquiry scan type (pg. 971)
+// TODO: read inquiry mode (pg. 972)
+// TODO: write inquiry mode  (pg. 973)
+// TODO: read page scan type  (pg. 974)
+// TODO: write page scan type  (pg. 975)
+// TODO: read afh channel assessment mode (pg. 976)
+// TODO: write afh channel assessment mode (pg. 977)
+
+// read extended inquiry response (pg. 979)
+read_extended_inquiry_response ($ogf: u8 = 0x03, $ocf: u16 = 0x0051) = {
+}
+
+read_extended_inquiry_response_response ($ogf: u8 = 0x03, $ocf: u16 = 0x0051) = {
+  public status: response_status();
+  public fec_required: u8;
+  response_buffer: [u8; 240];
+  public advertising_data: apply @response_buffer many!(basic_data_type());
+}
+
+// write extended inquiry response (pg. 980)
+write_extended_inquiry_response ($ogf: u8 = 0x03, $ocf: u16 = 0x0052) = {
+  public fec_required: u8;
+  response_buffer: [u8; 240];
+  public advertising_data: apply @response_buffer many!(basic_data_type());
+}
+
+write_extended_inquiry_response_response ($ogf: u8 = 0x03, $ocf: u16 = 0x0052) = {
+  public status: response_status();
+}
+
+// TODO: refresh encryption key (pg. 981)
+// TODO: read simple pairing mode (pg. 982)
+// TODO: write simple pairing mode (pg. 983)
+// TODO: read local oob data (pg. 985)
+// TODO: read inquiry response transmit power level (pg. 987)
+// TODO: write inquiry transmit power level (pg. 988)
+// TODO: send keypress notification (pg. 989)
+// TODO: read default erroneous data reporting (pg. 991)
+// TODO: write default erroneous data reporting (pg. 992)
+// TODO: enhanced flush (pg. 993)
+// TODO: read logical link accept timeout (pg. 995)
+// TODO: write logical link accept timeout (pg. 996)
+// TODO: set event mask (pg. 997)
+// TODO: read location data (pg. 999)
+// TODO: write location data (pg. 1000)
+// TODO: read flow control mode (pg. 1001)
+// TODO: write flow control mode (pg. 1002)
+// TODO: read enhanced transmit power level (pg. 1003)
+// TODO: read best effort flush timeout (pg. 1005)
+// TODO: write best effort flush timeout (pg. 1006)
+// TODO: short range mode (pg. 1007)
+
+// read le host support (pg. 1008)
+read_le_host_support ($ogf: u8 = 0x03, $ocf: u16 = 0x006C) = {
+}
+
+read_le_host_support_response ($ogf: u8 = 0x03, $ocf: u16 = 0x006C) = {
+  public status: response_status();
+  public le_supported_host: u8;
+  public simultaneous_le_host: u8;
+}
+
+// write le host support (pg. 1009)
+write_le_host_support ($ogf: u8 = 0x03, $ocf: u16 = 0x006D) = {
+  public le_supported_host: u8;
+  public simultaneous_le_host: u8;
+}
+
+write_le_host_support_response ($ogf: u8 = 0x03, $ocf: u16 = 0x006D) = {
+  public status: response_status();
+}
+
+// TODO: set mws channel parameters (pg. 1010)
+// TODO: set external frame configuration (pg. 1012)
+// TODO: set mws signaling (pg. 1015)
+// TODO: set mws transport layer (pg. 1020)
+// TODO: set mws scan frequency table (pg. 1021)
+// TODO: set mws_pattern configuration (pg. 1023)
+// TODO: set reserved lt_addr (pg. 1026)
+// TODO: delete reserved lt_addr (pg. 1028)
+// TODO: set connectionless slave broadcast data (pg. 1029)
+// TODO: read synchronization train parameters (pg. 1031)
+// TODO: write synchronization train parameters (pg. 1033)
+// TODO: read secure connections host support 1035
+// TODO: write secure connections host support (pg. 1036)
+// TODO: read authenticated payload timeout (pg. 1038)
+// TODO: write authenticated payload timeout (pg. 1040)
+// TODO: read local oob extended data (pg. 1042)
+// TODO: read extended page timeout (pg. 1044)
+// TODO: write extended page timeout (pg. 1045)
+// TODO: read extended inquiry length (pg. 1046)
+// TODO: write extended inquiry length (pg. 1047)
+
+
+//////////////////////////////////////
+//     INFORMATIONAL PARAMETERS     //
+//   BLUETOOTH SPEC v5.0 pg 1048    //
+//           (OGF=0x04)             //
+//////////////////////////////////////
+
+// TODO(P0): read local version information (pg. 1048)
+// TODO: read local supported commands (pg. 1050)
+// TODO: read local supported features (pg. 1051)
+// TODO: read local extended features (pg. 1052)
+// TODO: read buffer size (pg. 1054)
+// TODO(P0): read bd_addr (pg. 1056)
+// TODO: read data block size (pg. 1057)
+// TODO: read local supported codecs (pg. 1059)
+
+
+//////////////////////////////////////
+//        STATUS PARAMETERS         //
+//   BLUETOOTH SPEC v5.0 pg 1061    //
+//           (OGF=0x05)             //
+//////////////////////////////////////
+
+// TODO: read failed contact counter command (pg. 1061)
+// TODO: reset failed contact counter command (pg. 1063)
+// TODO: read link quality command (pg. 1064)
+// TODO(P0): read rssi command (pg. 1066)
+// TODO: read afh channel map command (pg. 1068)
+// TODO: read clock command (pg. 1070)
+// TODO: read encryption key size command (pg. 1072)
+// TODO: read local amp info command (pg. 1074)
+// TODO: read local amp assoc command (pg. 1079)
+// TODO: write remote amp assoc command (pg. 1082)
+// TODO: get mws transport layer configuration command 1084
+// TODO: set triggered clock capture command (pg. 1087)
+
+//////////////////////////////////////
+//         TESTING COMMANDS         //
+//   BLUETOOTH SPEC v5.0 pg 1090    //
+//           (OGF=0x06)             //
+//////////////////////////////////////
+
+// TODO: read loopback mode command (pg. 1090)
+// TODO: write loopback mode command (pg. 1092)
+// TODO: enable device under test mode command (pg. 1095)
+// TODO: write simple pairing debug mode command (pg. 1096)
+// TODO: enable amp receiver reports command (pg. 1098)
+// TODO: amp test end command (pg. 1099)
+// TODO: amp test command (pg. 1100)
+// TODO: write secure connections test mode command (pg. 1101)
+
+
+//////////////////////////////////////
+//      LE CONTROLLER COMMANDS      //
+//   BLUETOOTH SPEC v5.0 pg 1245    //
+//           (OGF=0x08)             //
+//////////////////////////////////////
+
+// le set event mask (pg. 1245)
+le_set_event_mask ($ogf: u8 = 0x08, $ocf: u16 = 0x0001) = {
+  public le_event_mask: [u8; 8];
+}
+
+le_set_event_mask_response ($ogf: u8 = 0x08, $ocf: u16 = 0x0001) = {
+  public status: response_status();
+}
+
+// le read buffer size  (pg. 1247)
+le_read_buffer_size ($ogf: u8 = 0x08, $ocf: u16 = 0x0002) = {
+}
+
+le_read_buffer_size_response ($ogf: u8 = 0x08, $ocf: u16 = 0x0002) = {
+  public status: response_status();
+  public hc_le_data_packet_length: u16;
+  public hc_total_num_le_data_packets: u8;
+}
+
+// le read local supported features (pg. 1249)
+le_read_local_supported_features ($ogf: u8 = 0x08, $ocf: u16 = 0x0003) = {
+}
+
+le_read_local_supported_features_response ($ogf: u8 = 0x08, $ocf: u16 = 0x0003) = {
+  public status: response_status();
+  public le_features: [u8; 8];
+}
+
+// le set random address command (pg. 1250)
+le_set_random_address_command ($ogf: u8 = 0x08, $ocf: u16 = 0x0005) = {
+  public random_address: [u8; 6];
+}
+
+le_set_random_address_command_response ($ogf: u8 = 0x08, $ocf: u16 = 0x0005) = {
+  public status: response_status();
+}
+
+// le set advertising parameters (pg. 1251)
+le_set_advertising_parameters ($ogf: u8 = 0x08, $ocf: u16 = 0x0006) = {
+  public advertising_interval_min: u16;
+  public advertising_interval_max: u16;
+  public advertising_type: u8;
+  public own_address_type: u8;
+  public peer_address_type: u8;
+  public peer_address: [u8; 6];
+  public advertising_channel_map: u8;
+  public advertising_filter_policy: u8;
+}
+
+le_set_advertising_parameters_response ($ogf: u8 = 0x08, $ocf: u16 = 0x0006) = {
+  public status: response_status();
+}
+
+// TODO: le set advertising channel tx power (pg. 1255)
+
+// le set advertising data (pg. 1256
+le_set_advertising_data ($ogf: u8 = 0x08, $ocf: u16 = 0x0008) = {
+  @advertising_data_length: u8;
+  @advertising_data_buffer: [u8; @advertising_data_length];
+  public advertising_data: apply @advertising_data_buffer many!(basic_data_type());
+}
+
+le_set_advertising_data_response ($ogf: u8 = 0x08, $ocf: u16 = 0x0008) = {
+  public status: response_status();
+}
+
+// TODO(P0): le set scan response data (pg. 1257)
+// TODO: le set advertising enable (pg. 1259)
+
+// le set scan parameters (pg. 1261)
+
+le_set_scan_parameters ($ogf: u8 = 0x08, $ocf: u16 = 0x000B) = {
+  public le_scan_type: u8;
+  public le_scan_interval: u16;
+  public le_scan_window: u16;
+  public own_address_type: u8;
+  public scanning_filter_policy: u8;
+}
+
+le_set_scan_parameters_response ($ogf: u8 = 0x08, $ocf: u16 = 0x000B) = {
+  public status: response_status();
+}
+
+// le set scan enable  (pg. 1264)
+
+le_set_scan_enable ($ogf: u8 = 0x08, $ocf: u16 = 0x000C) = {
+  public le_scan_enable: u8;
+  public filter_duplicates: u8;
+}
+
+le_set_scan_enable_response ($ogf: u8 = 0x08, $ocf: u16 = 0x000C) = {
+  public status: response_status();
+}
+
+// TODO(P0): le create connection (pg. 1266)
+// TODO: le create connection cancel (pg. 1271)
+// TODO: le read white list size (pg. 1272)
+// TODO: le clear white list (pg. 1273)
+// TODO(P0): le add device to white list (pg. 1274)
+// TODO(P0): le remove device from white list  (pg. 1276)
+// TODO(P0): le connection update  (pg. 1278)
+// TODO: le set host channel classification (pg. 1281)
+// TODO: le read channel map (pg. 1283)
+// TODO(P0): le read remote features (pg. 1285)
+// TODO: le encrypt (pg. 1286)
+// TODO: le rand  (pg. 1288)
+// TODO: le start encryption  (pg. 1289)
+// TODO: le long term key request reply (pg. 1291)
+// TODO: le long term key request negative reply (pg. 1292)
+// TODO: le read supported states (pg. 1293)
+// TODO: le receiver test (pg. 1295)
+// TODO: le transmitter test (pg. 1296)
+// TODO: le test end (pg. 1298)
+// TODO: le remote connection parameter request reply (pg. 1299)
+// TODO: le remote connection parameter request negative reply (pg. 1302)
+// TODO: le set data length (pg. 1304)
+// TODO: le read suggested default data length (pg. 1306)
+// TODO: le write suggested default data length (pg. 1308)
+// TODO: le read local p-256 public key (pg. 1309)
+// TODO: le generate dhkey (pg. 1310)
+// TODO: le add device to resolving list (pg. 1311)
+// TODO: le remove device from resolving list (pg. 1313)
+// TODO: le clear resolving list (pg. 1315)
+// TODO: le read resolving list size (pg. 1316)
+// TODO: le read peer resolvable address (pg. 1317)
+// TODO: le read local resolvable address (pg. 1319)
+// TODO: le set address resolution enable (pg. 1321)
+// TODO: le set resolvable private address timeout (pg. 1322)
+// TODO: le read maximum data length (pg. 1323)
+// TODO: le read phy (pg. 1325)
+// TODO: le set default phy (pg. 1327)
+// TODO: le set phy (pg. 1329)
+// TODO: le enhanced receiver test (pg. 1332)
+// TODO: le enhanced transmitter test (pg. 1334)
+// TODO: le set advertising set random address (pg. 1336)
+// TODO: le set extended advertising parameters (pg. 1338)
+// TODO: le set extended advertising data (pg. 1345)
+// TODO: le set extended scan response data (pg. 1348)
+// TODO: le set extended advertising enable (pg. 1351)
+// TODO: le read maximum advertising data length (pg. 1355)
+// TODO: le read number of supported advertising sets (pg. 1356)
+// TODO: le remove advertising set (pg. 1357)
+// TODO: le clear advertising sets (pg. 1358)
+// TODO: le set periodic advertising parameters (pg. 1359)
+// TODO: le set periodic advertising data (pg. 1361)
+// TODO: le set periodic advertising enable (pg. 1364)
+// TODO: le set extended scan parameters (pg. 1366)
+// TODO: le set extended scan enable (pg. 1369)
+// TODO: le extended create connection (pg. 1372)
+// TODO: le periodic advertising create sync (pg. 1378)
+// TODO: le periodic advertising create sync cancel (pg. 1381)
+// TODO: le periodic advertising terminate sync (pg. 1382)
+// TODO: le add device to periodic advertiser list (pg. 1383)
+// TODO: le remove device from periodic advertiser list (pg. 1385)
+// TODO: le clear periodic advertiser list (pg. 1387)
+// TODO: le read periodic advertiser list size (pg. 1388)
+// TODO: le read transmit power (pg. 1389)
+// TODO: le read rf path compensation (pg. 1390)
+// TODO: le write rf path compensation (pg. 1391)
+// TODO: le set privacy mode (pg. 1393)
+
+// the parser doesn't currently support comments at the end of a file :(
+end_thing () = {}
+

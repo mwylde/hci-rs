@@ -1,0 +1,9 @@
+hci_acl_data ($type: u8 = 0x02) = {
+  @handle_and_flags: u16;
+  public handle: u16 = @handle_and_flags & 0xFFF;
+  public flags: u8 = @handle_and_flags >> 12;
+  @data_total_length: u16;
+  public data: [u8; @data_total_length];
+}
+
+

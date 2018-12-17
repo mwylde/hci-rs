@@ -1,0 +1,162 @@
+hci_event ($type: u8 = 0x04) = {
+  @event_code: u8;
+  @parameter_length: u8;
+  @data: [u8; @parameter_length];
+  public event: apply @data choose {
+    DisconnectionComplete = disconnection_complete(@event_code) |
+    CommandComplete = command_complete(@event_code) |
+    LeMetaEvent = le_meta_event(@event_code) |
+    UnknownEvent = unknown_event(@event_code)
+  };
+}
+
+unknown_event (public $event_code: u8) = {
+  public data: rest!();
+}
+
+//////////////////////////////////////
+//              EVENTS              //
+//   BLUETOOTH SPEC v5.0 pg 1090    //
+//           (OGF=0x06)             //
+//////////////////////////////////////
+
+// TODO: inquiry complete event (pg. 1104)
+// TODO: inquiry result event (pg. 1105)
+// TODO: connection complete event (pg. 1107)
+// TODO: connection request event (pg. 1109)
+
+// disconnection complete event (pg. 1110)
+disconnection_complete ($event_code: u8 = 0x05) = {
+  public status: response_status();
+  public connection_handle: u16;
+  public reason: u8;
+}
+
+
+// TODO: authentication complete event (pg. 1111)
+// TODO: remote name request complete event (pg. 1112)
+// TODO: encryption change event (pg. 1113)
+// TODO: change connection link key complete event (pg. 1115)
+// TODO: master link key complete event (pg. 1116)
+// TODO: read remote supported features complete event (pg. 1117)
+// TODO: Read Remote Version Information Complete Event. 1118)
+// TODO: qos setup complete event (pg. 1120)
+
+// command complete event (pg. 1122)
+command_complete ($event_code: u8 = 0x0E) = {
+  // number of hci packets which are allowed to be sent to the controller
+  public @num_packets: u8;
+  @opcode: u16;
+  @ogf: u8 = @opcode >> 10;
+  @ocf: u16 = @opcode & 0x400 - 1;
+  public @response: choose {
+    NoAssociatedCommand = no_associated_command(@ogf, @ocf) |
+    Reset = reset_response(@ogf, @ocf) |
+    SetEventFilter = set_event_filter_response(@ogf, @ocf) |
+    Flush = flush_response(@ogf, @ocf) |
+    WriteLocalName = write_local_name_response(@ogf, @ocf) |
+    ReadLocalName = read_local_name_response(@ogf, @ocf) |
+    ReadConnectionAcceptTimeout = read_connection_accept_timeout_response(@ogf, @ocf) |
+    WriteConnectionAcceptTimeout = write_connection_accept_timeout_response(@ogf, @ocf) |
+    ReadPageTimeout = read_page_timeout_response(@ogf, @ocf) |
+    WritePageTimeout = write_page_timeout_response(@ogf, @ocf) |
+    ReadScanEnable = read_scan_enable_response(@ogf, @ocf) |
+    WriteScanEnable = write_scan_enable_response(@ogf, @ocf) |
+    ReadPageScanActivity = read_page_scan_activity_response(@ogf, @ocf) |
+    WritePageScanActivity = write_page_scan_activity_response(@ogf, @ocf) |
+    ReadInquiryScanActivity = read_inquiry_scan_activity_response(@ogf, @ocf) |
+    WriteInquiryScanActivity = write_inquiry_scan_activity_response(@ogf, @ocf) |
+    ReadExtendedInquiryResponse = read_extended_inquiry_response_response(@ogf, @ocf) |
+    WriteExtendedInquiryResponse = write_extended_inquiry_response_response(@ogf, @ocf) |
+    ReadLeHostSupport = read_le_host_support_response(@ogf, @ocf) |
+    WriteLeHostSupport = write_le_host_support_response(@ogf, @ocf) |
+
+    LeSetEventMask = le_set_event_mask(@ogf, @ocf) |
+    LeSetEventMaskResponse = le_set_event_mask_response(@ogf, @ocf) |
+    LeReadBufferSize = le_read_buffer_size_response(@ogf, @ocf) |
+    LeReadLocalSupportedFeatures = le_read_local_supported_features_response(@ogf, @ocf) |
+    LeSetRandomAddressCommand = le_set_random_address_command_response(@ogf, @ocf) |
+    LeSetAdvertisingParameters = le_set_advertising_parameters_response(@ogf, @ocf) |
+    LESetAdvertisingData = le_set_advertising_data_response(@ogf, @ocf) |
+    LeSetScanParameters = le_set_scan_parameters_response(@ogf, @ocf) |
+    LeSetScanEnable = le_set_scan_enable_response(@ogf, @ocf) |
+
+    UnknownCommand = unknown_command(@ogf, @ocf)
+  };
+}
+
+// sent to update the number of command packets that can be sent
+no_associated_command ($ogf: u8, $ocf: u16 = 0x0000) = {}
+
+unknown_command (public $ogf: u8, public $ocf: u16) = {
+  status: response_status();
+  data: rest!();
+}
+
+// TODO: command status event (pg. 1123)
+// TODO: hardware error event (pg. 1125)
+// TODO: flush occurred event (pg. 1126)
+// TODO: role change event (pg. 1127)
+// TODO: number of completed packets event (pg. 1128)
+// TODO: mode change event (pg. 1130)
+// TODO: return link keys event (pg. 1132)
+// TODO: pin code request event (pg. 1133)
+// TODO: link key request event (pg. 1134)
+// TODO: link key notification event (pg. 1135)
+// TODO: loopback command event (pg. 1137)
+// TODO: data buffer overflow event (pg. 1138)
+// TODO: max slots change event (pg. 1139)
+// TODO: read clock offset complete event (pg. 1140)
+// TODO: connection packet type changed event (pg. 1141)
+// TODO: qos violation event (pg. 1143)
+// TODO: page scan repetition mode change event (pg. 1144)
+// TODO: flow specification complete event (pg. 1145)
+// TODO: inquiry result with rssi event (pg. 1147)
+// TODO: read remote extended features complete event (pg. 1149)
+// TODO: synchronous connection complete event (pg. 1151)
+// TODO: synchronous connection changed event (pg. 1153)
+// TODO: sniff subrating event (pg. 1155)
+// TODO: extended inquiry result event (pg. 1157)
+// TODO: encryption key refresh complete event (pg. 1160)
+// TODO: io capability request event (pg. 1161)
+// TODO: io capability response event (pg. 1162)
+// TODO: user confirmation request event (pg. 1164)
+// TODO: user passkey request event (pg. 1165)
+// TODO: remote oob data request event (pg. 1166)
+// TODO: simple pairing complete event (pg. 1167)
+// TODO: link supervision timeout changed event (pg. 1168)
+// TODO: enhanced flush complete event (pg. 1169)
+// TODO: user passkey notification event (pg. 1170)
+// TODO: keypress notification event (pg. 1171)
+// TODO: remote host supported features notification event (pg. 1172)
+// TODO: physical link complete event (pg. 1173)
+// TODO: channel selected event (pg. 1174)
+// TODO: disconnection physical link complete event (pg. 1175)
+// TODO: physical link loss early warning event (pg. 1176)
+// TODO: physical link recovery event (pg. 1177)
+// TODO: logical link complete event (pg. 1178)
+// TODO: disconnection logical link complete event (pg. 1179)
+// TODO: flow spec modify complete event (pg. 1180)
+// TODO: number of completed data blocks event (pg. 1181)
+// TODO: short range mode change complete event (pg. 1183)
+// TODO: amp status change event (pg. 1184)
+// TODO: amp start test event (pg. 1186)
+// TODO: amp test end event (pg. 1187)
+// TODO: amp receiver report event (pg. 1188)
+
+// le meta event (pg. 1190) -- see le_meta_event.protogen
+
+// TODO: triggered clock capture event (pg. 1230)
+// TODO: synchronization train complete event (pg. 1232)
+// TODO: synchronization train received event (pg. 1233)
+// TODO: connectionless slave broadcast receive event (pg. 1235)
+// TODO: connectionless slave broadcast timeout event (pg. 1237)
+// TODO: truncated page complete event (pg. 1238)
+// TODO: slave page response timeout event (pg. 1239)
+// TODO: connectionless slave broadcast channel map change event (pg. 1240)
+// TODO: inquiry response notification event (pg. 1241)
+// TODO: authenticated payload timeout expired event (pg. 1242)
+// TODO: sam status change event (pg. 1243)
+
+// the parser doesn't current support comments at the end of a file :(
+end_thing2() = {}

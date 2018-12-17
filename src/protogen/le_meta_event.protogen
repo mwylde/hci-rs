@@ -1,0 +1,53 @@
+le_meta_event($event_code: u8 = 0x3E) = {
+  @subevent_code: u8;
+  public event: choose {
+    LeConnectionComplete = le_connection_complete($subevent_code) |
+    LeAdvertisingReport = le_advertising_report($subevent_code) |
+    LeConnectionUpdateComplete = le_connection_update_complete($subevent_code) |
+    LeReadRemoteFeaturesComplete = le_read_remote_features_complete($subevent_code)
+  };
+}
+
+// le connection complete event (pg. 1190)
+le_connection_complete ($subevent_code: u8 = 0x01) = {
+  public status: response_status();
+  @handle_and_flags: u16;
+  public connection_handle: u16 = @handle_and_flags & 0xFFF;
+  public role: u8;
+  public peer_address_type: u8;
+  public peer_address: [u8; 6];
+  public conn_interval: u16;
+  public conn_latency: u16;
+  public supervision_timeout: u16;
+  public master_clock_accuracy: u8;
+}
+
+// le advertising report event (pg. 1193)
+// protogen is not currently powerful enough to describe this format fully,
+// and can only handle num_reports of 1
+le_advertising_report ($subevent_code: u8 = 0x02) = {
+  @num_reports: u8;
+  public event_type: u8;
+  public address_type: u8;
+  public address: [u8; 6];
+  @data_len: u8;
+  @data_buffer: [u8; @data_len];
+  public data: apply @data_buffer many!(basic_data_type());
+  public rssi: u8;
+}
+
+// le connection update complete (pg. 1195)
+le_connection_update_complete ($subevent_code: u8 = 0x03) = {
+  public status: response_status();
+  public connection_handle: u16;
+  public conn_interval: u16;
+  public conn_latency: u16;
+  public supervision_timeout: u16;
+}
+
+// le read remote features complete (pg. 1197)
+le_read_remote_features_complete ($subevent_code: u8 = 0x04) = {
+  public status: response_status();
+  public connection_handle: u16;
+  public le_features: [u8; 8];
+}

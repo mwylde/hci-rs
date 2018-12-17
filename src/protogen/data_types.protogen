@@ -1,0 +1,135 @@
+//////////////////////////////////////
+//           Data Types             //
+//   SUPPLEMENT TO THE BLUETOOTH    //
+//       CORE SPECIFICATION         //
+//         CSSv7, Part A            //
+//////////////////////////////////////
+
+//service uuids -- CSSv7 pg. 10
+incomplete_service_uuid_16($type: u8 = 0x02, $len: u8) = {
+  public uuids: [u16; $len / 2];
+}
+
+complete_service_uuid_16($type: u8 = 0x03, $len: u8) = {
+  public uuids: [u16; $len / 2];
+}
+
+incomplete_service_uuid_32($type: u8 = 0x04, $len: u8) = {
+  public uuids: [u32; $len / 4];
+}
+
+complete_service_uuid_32($type: u8 = 0x05, $len: u8) = {
+  public uuids: [u32; $len / 4];
+}
+
+incomplete_service_uuid_128($type: u8 = 0x06, $len: u8) = {
+  public uuids: [[u8; 16]; $len / 16];
+}
+
+complete_service_uuid_128($type: u8 = 0x07, $len: u8) = {
+  public uuids: [[u8; 16]; $len / 16];
+}
+
+// local name -- CSSv7 pg. 11
+shortened_local_name($type: u8 = 0x08, $len: u8) = {
+  public local_name: str_utf8($len);
+}
+
+complete_local_name($type: u8 = 0x09, $len: u8) = {
+  public local_name: str_utf8($len);
+}
+
+// flags -- CSSv7 pg. 12
+ad_flags($type: u8 = 0x01, $len: u8) = {
+  public flags: [u8; $len];
+}
+
+// manufacturer specific data -- CSSv7 pg.13
+manufacturer_specific_data($type: u8 = 0xFF, $len: u8) = {
+  public company_identifier_code: u16;
+  public data: [u8; $len - 2];
+}
+
+// tx power level -- CSSv7 pg.13
+tx_power_level($type: u8 = 0x0A, $len: u8 = 1) = {
+  public level: i8;
+}
+
+// TODO: secure simple pairing out of band -- CSSv7 pg.14
+// TODO: security manager out of band -- CSSv7 pg.15
+// TODO: security manager tk value -- CSSv7 pg.16
+
+// slave connection interval range -- CSSv7 pg. 16
+slave_connection_interval_range($type: u8 = 0x12, $len: u8 = 4) = {
+  public min: u16;
+  public max: u16;
+}
+
+// service solicitation -- CSSv7 pg.17
+service_solicitation_16($type: u8 = 0x14, $len: u8) = {
+  public uuids: [u16; $len / 2];
+}
+
+service_solicitation_32($type: u8 = 0x1F, $len: u8) = {
+  public uuids: [u32; $len / 4];
+}
+
+service_solicitation_128($type: u8 = 0x15, $len: u8) = {
+  public uuids: [[u8; 16]; $len / 16];
+}
+
+// service data -- CSSv7 pg.18
+service_data_16($type: u8 = 0x16, $len: u8) = {
+  public uuid: u16;
+  public data: [u8; $len - 2];
+}
+
+service_data_32($type: u8 = 0x20, $len: u8) = {
+  public uuid: u32;
+  public data: [u8; $len - 4];
+}
+
+service_data_128($type: u8 = 0x21, $len: u8) = {
+  public uuid: [u8; 16];
+  public data: [u8; $len - 16];
+}
+
+// appearance -- CSSv7 pg. 18
+appearance($type: u8 = 0x19, $len: u8 = 2) = {
+  public appearance: u16;
+}
+
+// Used for advertising data, extended inquiry response data, scan response data,
+// additional controller advertising data, and OOB data blocks
+// see Core spec v5.0 pg 2039
+basic_data_type() = {
+  @length: u8;
+  @type: u8;
+  public data: choose {
+    IncompleteServiceUuid16 = incomplete_service_uuid_16(@type, @length - 1) |
+    CompleteServiceUuid16 = complete_service_uuid_16(@type, @length - 1) |
+    IncompleteServiceUuid32 = incomplete_service_uuid_32(@type, @length - 1) |
+    CompleteServiceUuid32 = complete_service_uuid_32(@type, @length - 1) |
+    IncompleteServiceUuid128 = incomplete_service_uuid_128(@type, @length - 1) |
+    CompleteServiceUuid128 = complete_service_uuid_128(@type, @length - 1) |
+    ShortenedLocalName = shortened_local_name(@type, @length - 1) |
+    CompleteLocalName = complete_local_name(@type, @length - 1) |
+    ADFlags = ad_flags(@type, @length - 1) |
+    ManufacturerSpecificData = manufacturer_specific_data(@type, @length - 1) |
+    TxPowerLevel = tx_power_level(@type, @length - 1) |
+    SlaveConnectionIntervalRange = slave_connection_interval_range(@type, @length - 1) |
+    ServiceSolicitation16 = service_solicitation_16(@type, @length - 1) |
+    ServiceSolicitation32 = service_solicitation_32(@type, @length - 1) |
+    ServiceSolicitation128 = service_solicitation_128(@type, @length - 1) |
+    ServiceData16 = service_data_16(@type, @length - 1) |
+    ServiceData32 = service_solicitation_32(@type, @length - 1) |
+    ServiceData128 = service_data_128(@type, @length - 1) |
+    Appearance = appearance(@type, @length - 1) |
+    UnsupportedDataType = unsupported_data_type(@type, @length - 1)
+  };
+}
+
+// used for unsupported data types
+unsupported_data_type($type: u8, $len: u8) = {
+  public data: [u8; $len];
+}

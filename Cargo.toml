@@ -1,0 +1,25 @@
+[package]
+name = "hci"
+version = "0.1.0"
+authors = ["Micah Wylde <micah@micahw.com>"]
+license = "MIT/Apache-2.0"
+build = "build.rs"
+
+description = """
+A parser for the bluetooth Host-Controller Interface (hci), currently
+supporting a partial implementation of Bluetooth 5.
+"""
+
+readme = "README.md"
+keywords = ["bluetooth", "hci"]
+categories = ["network-programming", "hardware-support"]
+homepage = "https://github.com/mwylde/hci-rs"
+
+[dependencies]
+nom = "^4.1"
+
+[build-dependencies]
+protogen = "^0.1"
+
+[dev-dependencies]
+hex = "^0.3"

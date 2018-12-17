@@ -1,0 +1,8 @@
+hci_message = {
+  @message_type: u8;
+  public message: choose {
+    HciCommand = hci_command(@message_type) |
+    HciAclData = hci_acl_data(@message_type) |
+    HciEvent = hci_event(@message_type)
+  };
+}
