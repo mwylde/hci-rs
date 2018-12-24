@@ -5,6 +5,7 @@ hci_command ($type: u8 = 0x01) = {
   @length: u8;
   @data: [u8; @length];
   public command: apply @data choose {
+    Disconnect = disconnect(@ogf, @ocf) |
     Reset = reset(@ogf, @ocf) |
     SetEventFilter = set_event_filter(@ogf, @ocf) |
     Flush = flush(@ogf, @ocf) |
@@ -33,6 +34,94 @@ response_status = {
 // unknown command
 unknown ($ogf: u8, $ocf: u16) = {}
 
+//////////////////////////////////////
+//       LINK CONTROL COMMANDS      //
+//    BLUETOOTH SPEC v5.0 pg 766    //
+//           (OGF=0x01)             //
+//////////////////////////////////////
+
+// TODO: inquiry (pg 766)
+// TODO: inquiry cancel (pg 769)
+// TODO: periodic inquiry mode (pg 770)
+// TODO: exit periodic inquiry mode (pg 773)
+// TODO: create connection (pg 774)
+
+// TODO: disconnect (pg 777)
+
+disconnect ($ogf: u8 = 0x01, $ocf : u16 = 0x0006) = {
+  public connection_handle: u16;
+  public reason: u8;
+}
+disconnect_response ($ogf: u8 = 0x03, $ocf : u16 = 0x0003) = {
+  public status: response_status();
+}
+
+// TODO: create connection cancel (pg 779)
+// TODO: accept connection request (pg 781)
+// TODO: reject connection request (pg 783)
+// TODO: link key request reply (pg 784)
+// TODO: link key request negative reply (pg 786)
+// TODO: pin code request reply (pg 787)
+// TODO: pin code request negative reply (pg 789)
+// TODO: change connection packet type (pg 790)
+// TODO: authentication requested (pg 793)
+// TODO: set connection encryption (pg 795)
+// TODO: change connection link key (pg 797)
+// TODO: master link key (pg 798)
+// TODO: remote name request (pg 800)
+// TODO: remote name request cancel (pg 802)
+// TODO: read remote supported features (pg 804)
+// TODO: read remote extended features (pg 805)
+// TODO: read remote version information (pg 807)
+// TODO: read clock offset (pg 808)
+// TODO: read lmp handle (pg 809)
+// TODO: setup synchronous connection (pg 811)
+// TODO: accept synchronous connection request (pg 815)
+// TODO: reject synchronous connection request (pg 819)
+// TODO: io capability request reply (pg 820)
+// TODO: user confirmation request reply (pg 823)
+// TODO: user confirmation request negative reply (pg 824)
+// TODO: user passkey request reply (pg 825)
+// TODO: user passkey request negative reply (pg 826)
+// TODO: remote oob data request reply (pg 827)
+// TODO: remote oob data request negative reply (pg 829)
+// TODO: io capability request negative reply (pg 830)
+// TODO: create physical link (pg 831)
+// TODO: accept physical link (pg 833)
+// TODO: disconnect physical link (pg 835)
+// TODO: create logical link (pg 837)
+// TODO: accept logical link (pg 839)
+// TODO: disconnect logical link (pg 841)
+// TODO: logical link cancel (pg 842)
+// TODO: flow spec modify (pg 844)
+// TODO: enhanced setup synchronous connection (pg 846)
+// TODO: enhanced accept synchronous connection (pg 856)
+// TODO: truncated page (pg 862)
+// TODO: truncated page cancel (pg 864)
+// TODO: set connectionless slave broadcast (pg 866)
+// TODO: set connectionless slave broadcast receive (pg 870)
+// TODO: start synchronization train (pg 874)
+// TODO: receive synchronization train (pg 875)
+// TODO: remote oob extended data request reply (pg 877)
+
+//////////////////////////////////////
+//        LINK POLICY COMMANDS      //
+//    BLUETOOTH SPEC v5.0 pg 879    //
+//           (OGF=0x02)             //
+//////////////////////////////////////
+
+// TODO: hold mode (pg 879)
+// TODO: sniff mode (pg 882)
+// TODO: exit sniff mode (pg 885)
+// TODO: qos setup (pg 886)
+// TODO: role discovery (pg 888)
+// TODO: switch role (pg 889)
+// TODO: read link policy settings (pg 891)
+// TODO: write link policy settings (pg 893)
+// TODO: read default link policy settings (pg 895)
+// TODO: write default link policy settings (pg 896)
+// TODO: flow specification (pg 897)
+// TODO: sniff subrating (pg 899)
 
 //////////////////////////////////////
 //  CONTROLLER & BASEBAND COMMANDS  //

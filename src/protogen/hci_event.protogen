@@ -51,6 +51,9 @@ command_complete ($event_code: u8 = 0x0E) = {
   @ocf: u16 = @opcode & 0x400 - 1;
   public @response: choose {
     NoAssociatedCommand = no_associated_command(@ogf, @ocf) |
+
+    Disconnect = disconnect_response(@ogf, @ocf) |
+
     Reset = reset_response(@ogf, @ocf) |
     SetEventFilter = set_event_filter_response(@ogf, @ocf) |
     Flush = flush_response(@ogf, @ocf) |
