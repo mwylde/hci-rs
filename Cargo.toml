@@ -16,10 +16,10 @@ categories = ["network-programming", "hardware-support"]
 homepage = "https://github.com/mwylde/hci-rs"
 
 [dependencies]
-nom = "^4.1"
+protogen = { git = "https://github.com/mwylde/protogen", branch = 'to_vec' }
 
 [build-dependencies]
-protogen = "^0.1"
+protogen-compiler =  { git = "https://github.com/mwylde/protogen", branch = 'to_vec' }
 
 [dev-dependencies]
 hex = "^0.3"

@@ -1,4 +1,4 @@
-extern crate nom;
+extern crate protogen;
 
 #[cfg(test)]
 extern crate hex;
@@ -9,6 +9,7 @@ pub mod protocol;
 mod tests {
     use hex;
     use protocol::*;
+    use protogen::State;
 
     #[test]
     fn test_local_name() {
@@ -20,14 +21,14 @@ mod tests {
         0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\
         0000000000000000000000000000000000000000000000000").unwrap();
 
-        HciMessage::parse(&msg).unwrap();
+        HciMessage::parse(State::from_slice(&msg)).unwrap();
     }
 
     #[test]
     fn test_unknown_command() {
         let msg = hex::decode("040e0601120c000000").unwrap();
 
-        HciMessage::parse(&msg).unwrap();
+        HciMessage::parse(State::from_slice(&msg)).unwrap();
     }
 
     #[test]
@@ -38,7 +39,7 @@ mod tests {
 
         let msg = hex::decode(data.replace(" ", "")).unwrap();
 
-        HciMessage::parse(&msg).unwrap();
+        HciMessage::parse(State::from_slice(&msg)).unwrap();
     }
 }
 

@@ -1,4 +1,4 @@
-extern crate protogen;
+extern crate protogen_compiler;
 
 use std::env;
 
@@ -20,5 +20,5 @@ fn main() {
     let mut output = env::current_dir().unwrap();
     output.push("src");
     output.push("protocol.rs");
-    protogen::process_dir_to(&path, &output, Some(&process_fn)).unwrap();
+    protogen_compiler::process_dir_to(&path, &output, Some(&process_fn)).unwrap();
 }

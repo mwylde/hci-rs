@@ -1,7 +1,6 @@
 hci_command ($type: u8 = 0x01) = {
-  @opcode: u16;
-  @ogf: u8 = @opcode >> 10;
-  @ocf: u16 = @opcode & 0x400 - 1;
+  @ogf: u6;
+  @ocf: u10;
   @length: u8;
   @data: [u8; @length];
   public command: apply @data choose {

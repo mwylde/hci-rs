@@ -11,8 +11,8 @@ le_meta_event($event_code: u8 = 0x3E) = {
 // le connection complete event (pg. 1190)
 le_connection_complete ($subevent_code: u8 = 0x01) = {
   public status: response_status();
-  @handle_and_flags: u16;
-  public connection_handle: u16 = @handle_and_flags & 0xFFF;
+  public connection_handle: u12;
+  reserved: u4;
   public role: u8;
   public peer_address_type: u8;
   public peer_address: [u8; 6];

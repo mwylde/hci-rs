@@ -103,6 +103,7 @@ appearance($type: u8 = 0x19, $len: u8 = 2) = {
 // additional controller advertising data, and OOB data blocks
 // see Core spec v5.0 pg 2039
 basic_data_type() = {
+  // TODO: handle lengths of 0
   @length: u8;
   @type: u8;
   public data: choose {
