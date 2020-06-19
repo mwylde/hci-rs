@@ -45,10 +45,10 @@ disconnection_complete ($event_code: u8 = 0x05) = {
 // command complete event (pg. 1122)
 command_complete ($event_code: u8 = 0x0E) = {
   // number of hci packets which are allowed to be sent to the controller
-  public @num_packets: u8;
+  public num_packets: u8;
   @ogf: u6;
   @ocf: u10;
-  public @response: choose {
+  public response: choose {
     NoAssociatedCommand = no_associated_command(@ogf, @ocf) |
 
     Disconnect = disconnect_response(@ogf, @ocf) |

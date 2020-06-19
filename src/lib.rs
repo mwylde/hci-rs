@@ -3,7 +3,9 @@ extern crate protogen;
 #[cfg(test)]
 extern crate hex;
 
-pub mod protocol;
+pub mod protocol {
+    include!(concat!(env!("OUT_DIR"), "/protogen.rs"));
+}
 
 #[cfg(test)]
 mod tests {
